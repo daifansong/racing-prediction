@@ -40,7 +40,7 @@
 
 `with_odd` 和 `no_odd` 里没写的键使用代码默认值。值只能是数字、字符串或 `null`。布尔、列表和对象会被拒绝。代码里默认是 `true` 或 `false` 的键不要写进 JSON。`null` 表示 Python 的 `None`；`random_forest`、`extra_trees` 和 `bagging` 的 `max_depth` 用 `null` 表示不限深度。
 
-`lightgbm`、`xgboost`、`catboost` 已有合法的空配置。`configs/gbdt.json` 现在是空文件，不能解析。`bagging`、`ngboost`、`ebm`、`hist_gbdt`、`random_forest`、`extra_trees` 还没有配置文件。文件缺失或不是合法 JSON 时，先写成上面的空骨架，再开始调参。
+`models/ml/selected/` 里的每个模型在 `configs/` 都有一份空配置：`with_odd` 和 `no_odd` 都是空对象。文件缺失或不是合法 JSON 时，先写成上面的空骨架，再开始调参。
 
 配置检查失败时，`{键名} saved failed` 表示这个键不在允许名单里，或值的类型不合法。`config saved failed` 表示文件缺失、JSON 无法解析，或顶层键不对。这些都要用配置修正，不要改代码。
 

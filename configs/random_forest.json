@@ -1,0 +1,5 @@
+{
+  "model": "random_forest",
+  "with_odd": {},
+  "no_odd": {}
+}

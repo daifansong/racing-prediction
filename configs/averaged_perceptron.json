@@ -1,0 +1,5 @@
+{
+  "model": "averaged_perceptron",
+  "with_odd": {},
+  "no_odd": {}
+}
