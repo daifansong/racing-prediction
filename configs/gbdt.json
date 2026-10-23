@@ -1,0 +1,5 @@
+{
+  "model": "gbdt",
+  "no_odd": {},
+  "with_odd": {}
+}
