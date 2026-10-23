@@ -1,0 +1,5 @@
+{
+  "model": "lightgbm",
+  "no_odd": {},
+  "with_odd": {}
+}

@@ -1,0 +1,5 @@
+{
+  "model": "catboost",
+  "with_odd": {},
+  "no_odd": {}
+}

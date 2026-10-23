@@ -1,0 +1,5 @@
+{
+  "model": "xgboost",
+  "with_odd": {},
+  "no_odd": {}
+}
