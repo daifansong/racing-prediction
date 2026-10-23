@@ -1,55 +1,86 @@
 # AGENTS.md
 
-## 任务目标
+## 本轮模型
 
-寻找 LightGBM 模型的最佳超参数配置，以实现在测试集上验证效果的最优表现。
+本轮只优化一个模型。模型名由对话开始时的用户指定，记为 `{model}`。
 
-## 工作约束与规则
+可选名字只有：
 
-1. **只允许修改配置文件**：只能通过修改 `configs/lightgbm.json` 来调整模型参数。
-2. **禁止修改代码文件**：严禁修改任何 `.py` 或其他代码文件。
-3. **严格遵守执行命令**：
-   - **模型训练**：仅使用 `python ml_train_selected.py --model lightgbm`
-   - **模型测试**：仅使用 `python ml_test_selected.py --model lightgbm`
+`lightgbm`、`xgboost`、`catboost`、`gbdt`、`bagging`、`ngboost`、`ebm`、`hist_gbdt`、`random_forest`、`extra_trees`
 
-## 配置文件格式 (`configs/lightgbm.json`)
+在仓库根目录执行，解释器使用 `venv/bin/python`。一次只跑一个进程，训练退出后再测试，测试退出后再读结果。
 
-配置文件结构如下：
+- 配置文件：`configs/{model}.json`
+- 训练：`venv/bin/python ml_train_selected.py --model {model}`
+- 测试：`venv/bin/python ml_test_selected.py --model {model}`
+- 测试成绩追加在 `out/selected/{model}.csv`
+- 训练日志在 `out/logs/{时间}_{model}.csv`
+
+## 工作约束
+
+1. 只创建或修改 `configs/{model}.json`。
+2. 不修改任何 `.py` 或其他代码文件，也不改 `v1.csv`、`dataset/` 和已有模型文件。
+3. 命令只使用上面的两条。不要换模型名，不要并行启动第二个训练或测试。
+4. 每次训练都会完成四个任务，不能只训其中一个：
+   - `win_with_odd`、`place_with_odd` 使用 `with_odd`，132 列，含 `win_odd`
+   - `win_no_odd`、`place_no_odd` 使用 `no_odd`，131 列，已去掉 `win_odd`
+5. 参数名只从本轮模型的代码里取。不要把上一轮模型的键抄进本轮配置。
+
+## 配置文件
+
+顶层只能有这三个键，且 `model` 必须等于本轮名字：
 
 ```json
 {
-  "model": "lightgbm",
-  "no_odd": {},
-  "with_odd": {}
+  "model": "{model}",
+  "with_odd": {},
+  "no_odd": {}
 }
 ```
 
-请在 `no_odd` 与 `with_odd` 字典中填入要探索和优化的具体超参数（如 `learning_rate`、`num_leaves`、`max_depth`、`n_estimators`、`subsample`、`colsample_bytree` 等）。
+`with_odd` 和 `no_odd` 里没写的键使用代码默认值。值只能是数字、字符串或 `null`。布尔、列表和对象会被拒绝。代码里默认是 `true` 或 `false` 的键不要写进 JSON。`null` 表示 Python 的 `None`；`random_forest`、`extra_trees` 和 `bagging` 的 `max_depth` 用 `null` 表示不限深度。
+
+`lightgbm`、`xgboost`、`catboost` 已有合法的空配置。`configs/gbdt.json` 现在是空文件，不能解析。`bagging`、`ngboost`、`ebm`、`hist_gbdt`、`random_forest`、`extra_trees` 还没有配置文件。文件缺失或不是合法 JSON 时，先写成上面的空骨架，再开始调参。
+
+配置检查失败时，`{键名} saved failed` 表示这个键不在允许名单里，或值的类型不合法。`config saved failed` 表示文件缺失、JSON 无法解析，或顶层键不对。这些都要用配置修正，不要改代码。
+
+## 如何确定合法参数
+
+开调之前先读两处：
+
+1. `models/ml/selected/{model}.py` 里的 `default_params()`
+2. `ml_train_selected.py` 里的 `EXTRA_PARAM_NAMES`
+
+这两处的并集才是本轮允许写入的键。`default_params()` 里的值就是默认值。
+
+以下情况读默认字典看不出来：
+
+- `lightgbm` 和 `xgboost` 可以额外写 `pos_weight_mult`。它会乘上该任务训练集的负正比。训练集独赢正例约 8%，前三约 24%。
+- `catboost` 的额外键是 `auto_class_weights`，值为字符串。不写这一键表示关闭。
+- `lightgbm` 的 `num_boost_round` 和 `early_stopping_rounds` 可以调。`xgboost` 的最大轮数 1000 和早停 50 写在代码里，配置改不了。
+- 含赔率任务上对 `win_odd` 的单调约束由模型代码设置。配置里不能写列表，所以不要添加 `monotone_constraints`。
+- 随机种子的键名可能是 `seed`、`random_state` 或 `random_seed`。本轮不要改种子。有的模型把种子直接写在代码里，那种也不要改。
+- `objective`、`loss_function`、`eval_metric` 保持默认，维持二分类。
+
+## 评价指标
+
+用测试成绩排名，不用训练日志里的验证集 AUC。训练日志只有验证集 AUC，列是 `model`、`auc_win_with_odd`、`auc_place_with_odd`、`auc_win_no_odd`、`auc_place_no_odd`、`with_odd_params`、`no_odd_params`。
+
+测试文件每次追加 4 行。列是 `time`、`task`、`params`、`auc_roc`、`auc_pr`、`logloss`、`brier`、`f1`、`precision`、`recall`、`threshold`、`precision_at_base`。只读本次运行新追加的 4 行，用 stdout 里的 `Saving scores:` 确认路径。
+
+主指标是四个任务的 `auc_roc`，越高越好。`auc_pr`、`f1`、`precision_at_base` 越高越好，`logloss`、`brier` 越低越好。测试脚本还会打印赔率基线，当前数据上独赢 `auc_roc` 约 0.7729，前三约 0.7591。
 
 ## 工作流程
 
-1. **配置参数**
+1. 确认 `{model}`，读该模型的 `default_params()` 和 `EXTRA_PARAM_NAMES`。配置文件不可用时先写入空骨架。
+2. 更新 `configs/{model}.json`。每轮只改少数几个参数。`out/selected/{model}.csv` 里已经出现过的参数组合不要重跑。
+3. 运行训练命令，等待进程退出。
+4. 运行测试命令，等待进程退出。读取本次追加的 4 行。
+5. 与上一轮最好的 4 行比较。本轮更差就把配置退回上一轮最好的 JSON。
+6. 重复第 2 步到第 5 步，直到达到停止条件。
 
-   编写或更新 `configs/lightgbm.json` 中的参数配置。
+## 停止条件
 
-2. **模型训练**
+试验次数上限为 8 到 12 次。连续 3 次没有提高四个任务的 `auc_roc` 时停止。
 
-   运行训练脚本：
-
-   ```bash
-   python ml_train_selected.py --model lightgbm
-   ```
-
-3. **模型测试与效果查看**
-
-   运行测试脚本：
-
-   ```bash
-   python ml_test_selected.py --model lightgbm
-   ```
-
-   测试运行完毕后，测试结果会保存在 `out/selected/lightgbm.csv`（或对应输出目录下的 CSV 文件）中，可直接读取该文件评估模型表现。
-
-4. **对比与迭代**
-
-   查看 CSV 文件中的评估指标。根据测试指标反馈调整 `configs/lightgbm.json` 中的参数，重复上述步骤，直到找到最佳配置。
+结束后在回复里留下最佳的 `configs/{model}.json` 全文，以及对应的 4 行测试指标。
