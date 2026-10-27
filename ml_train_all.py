@@ -50,7 +50,7 @@ T3_MODEL_NAMES = (
 MODEL_NAMES = T1_MODEL_NAMES + T2_MODEL_NAMES + T3_MODEL_NAMES
 
 def model_class(model_name):
-    return importlib.import_module(f'models.ml.all.{model_name}').Model
+    return importlib.import_module(f'models.all.{model_name}').Model
 
 def train_model(model_cls, x_train, y_train, x_val, y_val):
     model = model_cls()

@@ -40,7 +40,7 @@ def to_matrix(frame, columns):
 
 def load_models(model_name, model_root, package_name):
     model_cls = importlib.import_module(
-        f'models.ml.{package_name}.{model_name}'
+        f'models.{package_name}.{model_name}'
     ).Model
     model_dir = os.path.join(model_root, model_name)
     models = {}

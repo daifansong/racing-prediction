@@ -34,7 +34,7 @@ ROW_COLUMNS = ('model', *SCORE_COLUMNS, 'with_odd_params', 'no_odd_params')
 def model_module(model_name):
     if model_name not in ALL_MODEL_NAMES:
         raise ValueError(f'\t{model_name} saved failed')
-    return importlib.import_module(f'models.ml.selected.{model_name}')
+    return importlib.import_module(f'models.selected.{model_name}')
 
 def load_config(config_path):
     if not os.path.isfile(config_path):
