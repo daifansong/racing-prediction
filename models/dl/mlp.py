@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from ml_train_all import roc_auc
+from sklearn.metrics import roc_auc_score
 
 # 逐马二分类的两层网络。四个任务各训一份，含赔率 132 列，无赔率 131 列。
 # 训练集上做中位数填补和标准化。验证集只用来决定停在哪一轮，不参与这两步。
@@ -125,7 +125,7 @@ class Model:
                 optimizer.step()
                 total += float(loss.item()) * len(yb)
                 count += len(yb)
-            val_auc = roc_auc(y_valid, self.scores(x_valid))
+            val_auc = roc_auc_score(y_valid, self.scores(x_valid))
             print(f'epoch {epoch} train loss {total / count:.4f} val auc {val_auc:.4f}')
             if val_auc > best_auc:
                 best_auc = val_auc
