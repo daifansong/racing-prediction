@@ -4,7 +4,7 @@ import time
 
 import pandas as pd
 
-from ml_util_train import (
+from utils_train import (
     TRAIN_TASKS,
     format_duration,
     load_data,
@@ -51,7 +51,7 @@ def train_dl():
     stamp = time.strftime('%Y%m%d_%H%M%S')
     score_path = os.path.join(MODEL_DIR, f'p1_dl_train_{stamp}.csv')
     pd.DataFrame(columns=['model', *SCORE_COLUMNS]).to_csv(score_path, index=False)
-    print(f'Saving scores: {score_path}')
+    print(f'\nSaving scores: {score_path}')
 
     for model_name in MODEL_NAMES:
         model_cls = model_class(model_name)

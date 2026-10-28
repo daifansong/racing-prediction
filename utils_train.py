@@ -6,7 +6,7 @@ import pandas as pd
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(ROOT, 'dataset')
 SPEC_CSV = os.path.join(ROOT, 'v1.csv')
-OUT_MODEL_PATH = os.path.join(ROOT, 'out')
+OUT_MODEL_PATH = os.path.join(ROOT, 'out', 'ml')
 
 MISSING = {'', '--', '---'}
 Y_COLUMNS = ['y_win', 'y_place']
@@ -25,7 +25,7 @@ SCORE_COLUMNS = (
 
 def read_x_features():
     if not os.path.isfile(SPEC_CSV):
-        raise ValueError('\tv1.csv saved failed')
+        raise ValueError('\tfeature-v1.csv saved failed')
     feature_df = pd.read_csv(SPEC_CSV, dtype=str, keep_default_na=False)
     return feature_df['feature'].tolist()
 

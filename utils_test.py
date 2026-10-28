@@ -9,7 +9,7 @@ from sklearn.metrics import roc_auc_score
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(ROOT, 'dataset')
 SPEC_CSV = os.path.join(ROOT, 'v1.csv')
-SCORE_DIR = os.path.join(ROOT, 'out')
+SCORE_DIR = os.path.join(ROOT, 'out', 'ml')
 MISSING = {'', '--', '---'}
 Y_COLUMNS = ['y_win', 'y_place']
 TASKS = (
@@ -26,11 +26,11 @@ ROW_COLUMNS = ('model', 'task', *SCORE_COLUMNS)
 
 def read_x_features():
     if not os.path.isfile(SPEC_CSV):
-        raise ValueError('\tv1.csv saved failed')
+        raise ValueError('\tfeature-v1.csv saved failed')
     feature_df = pd.read_csv(SPEC_CSV, dtype=str, keep_default_na=False)
     names = feature_df['feature'].tolist()
     if 'win_odd' not in names:
-        raise ValueError('\tv1.csv saved failed')
+        raise ValueError('\tfeature-v1.csv saved failed')
     return names
 
 def to_matrix(frame, columns):
@@ -40,7 +40,7 @@ def to_matrix(frame, columns):
 
 def load_models(model_name, model_root, package_name):
     model_cls = importlib.import_module(
-        f'models.{package_name}.{model_name}'
+        f'{package_name}.{model_name}'
     ).Model
     model_dir = os.path.join(model_root, model_name)
     models = {}

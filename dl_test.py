@@ -4,8 +4,8 @@ import time
 
 import pandas as pd
 
-from ml_util_test import load_split, predict_score, read_x_features
-from ml_util_train import odds_auc, roc_auc
+from utils_test import load_split, predict_score, read_x_features
+from utils_train import odds_auc, roc_auc
 
 OUT_MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'out')
 MODEL_DIR = os.path.join(OUT_MODEL_PATH, 'dl')
@@ -65,7 +65,7 @@ def test_dl():
     stamp = time.strftime('%Y%m%d_%H%M%S')
     score_path = os.path.join(MODEL_DIR, f'p1_dl_test_{stamp}.csv')
     pd.DataFrame(columns=['model', *SCORE_COLUMNS]).to_csv(score_path, index=False)
-    print(f'Saving scores: {score_path}')
+    print(f'\nSaving scores: {score_path}')
     for model_name in MODEL_NAMES:
         models = load_models(model_name, columns, odd_index)
         row = {'model': model_name}
