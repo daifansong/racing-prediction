@@ -10,11 +10,13 @@ from utils_train import odds_auc, roc_auc
 OUT_MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'out')
 MODEL_DIR = os.path.join(OUT_MODEL_PATH, 'dl')
 MODEL_NAMES = (
-    'mlp_resnet_tower_1',
-    'mlp_resnet_tower_2',
-    'mlp_resnet_tower_3',
-    'mlp_resnet_tower_4',
-    'mlp_resnet_tower_5',
+    # 'mlp_resnet_tower_1',
+    # 'mlp_resnet_tower_2',
+    # 'mlp_resnet_tower_3',
+    # 'mlp_resnet_tower_4',
+    # 'mlp_resnet_tower_5',
+    'ft_transformer',
+    'mlp_simple'
 )
 SCORE_COLUMNS = (
     'auc_win_with_odd',

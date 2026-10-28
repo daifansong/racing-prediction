@@ -61,7 +61,8 @@ def fill_median(x, median):
 
 
 class Model:
-    def __init__(self):
+    def __init__(self, feature_columns=None):
+        self.feature_columns = None if feature_columns is None else list(feature_columns)
         self.net = None
         self.median = None
         self.mean = None
@@ -162,7 +163,7 @@ class Model:
             y_val_pred = self.predict(x_val)
             val_stats = self.calculate_stats(y_val_pred, y_val)
             val_auc = val_stats['auc']
-            print(f'Epoch {epi}: train loss {total / count:.4f}\t val loss {val_stats["logloss"]:.4f}\t val auc {val_auc:.4f}')
+            print(f'Epoch {epi}: train loss {total / count:.4f}\t val loss {val_stats["logloss"]:.4f}\t\tval auc {val_auc:.4f}')
 
             if val_auc > best_auc:
                 best_auc = val_auc
@@ -175,7 +176,7 @@ class Model:
                     break
         self.net.load_state_dict(best_state)
         self.net.to(self.device)
-        print(f'Best Epoch {best_epoch}: val auc {best_auc:.4f}')
+        print(f'\nBest Epoch {best_epoch}: val auc {best_auc:.4f}')
 
     def save(self, path):
         torch.save(

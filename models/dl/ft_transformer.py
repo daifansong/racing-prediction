@@ -113,7 +113,8 @@ def fill_median(x, median):
 
 
 class Model:
-    def __init__(self):
+    def __init__(self, feature_columns=None):
+        self.feature_columns = None if feature_columns is None else list(feature_columns)
         self.net = None
         self.feature_median = None
         self.feature_mean = None
